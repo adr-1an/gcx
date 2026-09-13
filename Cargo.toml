@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.104"
 eframe = "0.36.2"
+mavlink = { version = "0.18.0", features = ["dialect-ardupilotmega"] }

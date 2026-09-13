@@ -1,5 +1,7 @@
-use crate::app::{App, ConnectionType};
+use crate::app::App;
 use eframe::egui;
+use crate::core::connection::Connection;
+
 pub fn show(app: &mut App, ui: &mut egui::Ui) {
     egui::Frame::new().show(ui, |ui| {
         ui.set_width(ui.available_width());
@@ -43,22 +45,15 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                                     )
                                     .clicked()
                                 {
-                                    app.connection.loading = !app.connection.loading;
+                                    match Connection::new(&app.connection.address) {
+                                        Ok(c) => {
+                                            app.connection.mavlink_conn = c.mavlink_conn;
+                                        },
+                                        Err(e) => {
+                                            app.error = Some(Box::from(e));
+                                        }
+                                    }
                                 }
-                                egui::ComboBox::from_id_salt("type")
-                                    .selected_text(&app.connection.connection_type.to_string())
-                                    .show_ui(ui, |ui| {
-                                        ui.selectable_value(
-                                            &mut app.connection.connection_type,
-                                            ConnectionType::Disconnected,
-                                            "Disconnected",
-                                        );
-                                        ui.selectable_value(
-                                            &mut app.connection.connection_type,
-                                            ConnectionType::UDP,
-                                            "UDP",
-                                        );
-                                    });
                                 ui.text_edit_singleline(&mut app.connection.address);
                             }
                         });

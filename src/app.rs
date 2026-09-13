@@ -1,40 +1,20 @@
 use crate::core::vehicle::vehicle;
 use crate::ui;
 use eframe::egui;
-use std::fmt::Display;
-
-#[derive(PartialEq)]
-pub enum ConnectionType {
-    Disconnected,
-    UDP,
-}
-
-impl Display for ConnectionType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ConnectionType::Disconnected => write!(f, "Disconnected"),
-            ConnectionType::UDP => write!(f, "UDP"),
-        }
-    }
-}
-
-pub struct Connection {
-    pub connection_type: ConnectionType,
-    pub address: String,
-    pub loading: bool,
-}
+use crate::core::connection::Connection;
 
 pub struct App {
+    pub error: Option<Box<dyn std::error::Error + Send + Sync>>,
     pub vehicle: Option<vehicle::Vehicle>,
     pub connection: Connection,
 }
-
 impl App {
     pub fn new() -> Self {
         Self {
+            error: None,
             vehicle: None,
             connection: Connection {
-                connection_type: ConnectionType::Disconnected,
+                mavlink_conn: None,
                 address: String::new(),
                 loading: false,
             },
@@ -44,6 +24,8 @@ impl App {
 
 impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        ui::error::show(&mut self.error, ui);
+        
         egui::Panel::top("navbar")
             .resizable(false)
             .default_size(50.0)
